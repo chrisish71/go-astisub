@@ -204,6 +204,7 @@ type StyleAttributes struct {
 	STLJustification     *Justification
 	STLPosition          *STLPosition
 	STLUnderline         *bool
+	STLColor             *string
 	TeletextColor        *Color
 	TeletextDoubleHeight *bool
 	TeletextDoubleSize   *bool
@@ -211,41 +212,45 @@ type StyleAttributes struct {
 	TeletextSpacesAfter  *int
 	TeletextSpacesBefore *int
 	// TODO Use pointers with real types below
-	TTMLBackgroundColor  *string // https://htmlcolorcodes.com/fr/
-	TTMLColor            *string
-	TTMLDirection        *string
-	TTMLDisplay          *string
-	TTMLDisplayAlign     *string
-	TTMLExtent           *string
-	TTMLFontFamily       *string
-	TTMLFontSize         *string
-	TTMLFontStyle        *string
-	TTMLFontWeight       *string
-	TTMLLineHeight       *string
-	TTMLOpacity          *string
-	TTMLOrigin           *string
-	TTMLOverflow         *string
-	TTMLPadding          *string
-	TTMLShowBackground   *string
-	TTMLTextAlign        *string
-	TTMLTextDecoration   *string
-	TTMLTextOutline      *string
-	TTMLUnicodeBidi      *string
-	TTMLVisibility       *string
-	TTMLWrapOption       *string
-	TTMLWritingMode      *string
-	TTMLZIndex           *int
-	WebVTTAlign          string
-	WebVTTItalics        bool
-	WebVTTLine           string
-	WebVTTLines          int
-	WebVTTPosition       string
-	WebVTTRegionAnchor   string
-	WebVTTScroll         string
-	WebVTTSize           string
-	WebVTTVertical       string
-	WebVTTViewportAnchor string
-	WebVTTWidth          string
+	TTMLBackgroundColor   *string // https://htmlcolorcodes.com/fr/
+	TTMLColor             *string
+	TTMLDirection         *string
+	TTMLDisplay           *string
+	TTMLDisplayAlign      *string
+	TTMLExtent            *string
+	TTMLFontFamily        *string
+	TTMLFontSize          *string
+	TTMLFontStyle         *string
+	TTMLFontWeight        *string
+	TTMLLineHeight        *string
+	TTMLOpacity           *string
+	TTMLOrigin            *string
+	TTMLOverflow          *string
+	TTMLPadding           *string
+	TTMLShowBackground    *string
+	TTMLTextAlign         *string
+	TTMLTextDecoration    *string
+	TTMLTextOutline       *string
+	TTMLUnicodeBidi       *string
+	TTMLVisibility        *string
+	TTMLWrapOption        *string
+	TTMLWritingMode       *string
+	TTMLZIndex            *int
+	WebVTTColor           string
+	WebVTTBackgroundColor string
+	WebVTTAlign           string
+	WebVTTItalics         bool
+	WebVTTUnderline       bool
+	WebVTTBold            bool
+	WebVTTLine            string
+	WebVTTLines           int
+	WebVTTPosition        string
+	WebVTTRegionAnchor    string
+	WebVTTScroll          string
+	WebVTTSize            string
+	WebVTTVertical        string
+	WebVTTViewportAnchor  string
+	WebVTTWidth           string
 }
 
 func (sa *StyleAttributes) propagateSSAAttributes() {}

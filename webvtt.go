@@ -499,27 +499,56 @@ func (l Line) webVTTBytes() (c []byte) {
 }
 
 func (li LineItem) webVTTBytes() (c []byte) {
-	// Get color
+
+	// Get background color
+	var bgColor string
+	if li.InlineStyle != nil && len(li.InlineStyle.WebVTTBackgroundColor) > 0 {
+		bgColor = cssBgColor(li.InlineStyle.WebVTTBackgroundColor)
+	}
+
+	// Get text color
 	var color string
-	if li.InlineStyle != nil && li.InlineStyle.TTMLColor != nil {
-		color = cssColor(*li.InlineStyle.TTMLColor)
+	if li.InlineStyle != nil && len(li.InlineStyle.WebVTTColor) > 0 {
+		color = cssColor(li.InlineStyle.WebVTTColor)
 	}
 
 	// Get italics
 	i := li.InlineStyle != nil && li.InlineStyle.WebVTTItalics
 
+	// Get bold
+	b := li.InlineStyle != nil && li.InlineStyle.WebVTTBold
+
+	// Get underline
+	u := li.InlineStyle != nil && li.InlineStyle.WebVTTUnderline
+
 	// Append
-	if color != "" {
+	if bgColor != "" && color != "" {
+		c = append(c, []byte("<c."+color+"."+bgColor+">")...)
+	} else if bgColor != "" {
+		c = append(c, []byte("<c."+bgColor+">")...)
+	} else if color != "" {
 		c = append(c, []byte("<c."+color+">")...)
 	}
 	if i {
 		c = append(c, []byte("<i>")...)
 	}
+	if b {
+		c = append(c, []byte("<b>")...)
+	}
+	if u {
+		c = append(c, []byte("<u>")...)
+	}
 	c = append(c, []byte(li.Text)...)
+	if u {
+		c = append(c, []byte("</u>")...)
+	}
+	if b {
+		c = append(c, []byte("</b>")...)
+	}
 	if i {
 		c = append(c, []byte("</i>")...)
 	}
-	if color != "" {
+	if bgColor != "" || color != "" {
 		c = append(c, []byte("</c>")...)
 	}
 	return
@@ -527,11 +556,28 @@ func (li LineItem) webVTTBytes() (c []byte) {
 
 func cssColor(rgb string) string {
 	colors := map[string]string{
-		"#00ffff": "cyan",    // narrator, thought
-		"#ffff00": "yellow",  // out of vision
-		"#ff0000": "red",     // noises
-		"#ff00ff": "magenta", // song
-		"#00ff00": "lime",    // foreign speak
+		"#ffffff": "white",
+		"#00ff00": "lime",
+		"#00ffff": "cyan",
+		"#ff0000": "red",
+		"#ffff00": "yellow",
+		"#ff00ff": "magenta",
+		"#0000ff": "blue",
+		"#000000": "black",
 	}
 	return colors[strings.ToLower(rgb)] // returning the empty string is ok
+}
+
+func cssBgColor(rgb string) string {
+	bgColors := map[string]string{
+		"#ffffff": "bg_white",
+		"#00ff00": "bg_lime",
+		"#00ffff": "bg_cyan",
+		"#ff0000": "bg_red",
+		"#ffff00": "bg_yellow",
+		"#ff00ff": "bg_magenta",
+		"#0000ff": "bg_blue",
+		"#000000": "bg_black",
+	}
+	return bgColors[strings.ToLower(rgb)] // returning the empty string is ok
 }

@@ -159,10 +159,21 @@ var stlLanguageMapping = astikit.NewBiMap().
 	Set(stllanguageCodeJapanese, LanguageJapanese).
 	Set(stlLanguageCodeNorwegian, LanguageNorwegian)
 
-	// STL timecode status
+// STL timecode status
 const (
 	stlTimecodeStatusNotIntendedForUse = "0"
 	stlTimecodeStatusIntendedForUse    = "1"
+)
+
+const (
+	stlAlphaBlack   = '\x00'
+	stlAlphaRed     = '\x01'
+	stlAlphaGreen   = '\x02'
+	stlAlphaYellow  = '\x03'
+	stlAlphaBlue    = '\x04'
+	stlAlphaMagenta = '\x05'
+	stlAlphaCyan    = '\x06'
+	stlAlphaWhite   = '\x07'
 )
 
 // TTI Special Extension Block Number
@@ -349,7 +360,7 @@ func newGSIBlock(s Subtitles) (g *gsiBlock) {
 		countryOfOrigin:          stlCountryCodeFrance,
 		creationDate:             Now(),
 		diskSequenceNumber:       1,
-		displayStandardCode:      stlDisplayStandardCodeLevel1Teletext,
+		displayStandardCode:      stlDisplayStandardCodeLevel2Teletext,
 		framerate:                25,
 		languageCode:             stlLanguageCodeFrench,
 		maximumNumberOfDisplayableCharactersInAnyTextRow: 40,
@@ -657,7 +668,7 @@ func newTTIBlock(i *Item, idx int) (t *ttiBlock) {
 		commentFlag:          stlCommentFlagTextContainsSubtitleData,
 		cumulativeStatus:     stlCumulativeStatusSubtitleNotPartOfACumulativeSet,
 		extensionBlockNumber: 255,
-		justificationCode:    stlJustificationCodeLeftJustifiedText,
+		justificationCode:    stlJustificationCodeFromStyle(i.InlineStyle),
 		subtitleGroupNumber:  0,
 		subtitleNumber:       idx,
 		timecodeIn:           i.StartAt,
@@ -678,6 +689,20 @@ func newTTIBlock(i *Item, idx int) (t *ttiBlock) {
 	return
 }
 
+func stlJustificationCodeFromStyle(sa *StyleAttributes) byte {
+	if sa != nil && sa.STLJustification != nil {
+		switch sa.STLJustification {
+		case &JustificationLeft:
+			return uint8(stlJustificationCodeLeftJustifiedText)
+		case &JustificationCentered:
+			return uint8(stlJustificationCodeCentredText)
+		case &JustificationRight:
+			return uint8(stlJustificationCodeRightJustifiedText)
+		}
+	}
+	return uint8(stlJustificationCodeUnchangedPresentation)
+}
+
 func stlVerticalPositionFromStyle(sa *StyleAttributes) int {
 	if sa != nil && sa.STLPosition != nil {
 		return sa.STLPosition.VerticalPosition
@@ -689,6 +714,9 @@ func stlVerticalPositionFromStyle(sa *StyleAttributes) int {
 func (li LineItem) STLString() string {
 	rs := li.Text
 	if li.InlineStyle != nil {
+		if li.InlineStyle.STLColor != nil {
+			rs = stlColorCodeFromStyle(*li.InlineStyle.STLColor) + rs
+		}
 		if li.InlineStyle.STLItalics != nil && *li.InlineStyle.STLItalics {
 			rs = string(rune(0x80)) + rs + string(rune(0x81))
 		}
@@ -696,10 +724,31 @@ func (li LineItem) STLString() string {
 			rs = string(rune(0x82)) + rs + string(rune(0x83))
 		}
 		if li.InlineStyle.STLBoxing != nil && *li.InlineStyle.STLBoxing {
-			rs = string(rune(0x84)) + rs + string(rune(0x85))
+			rs = string(rune(0x84)) + string(rune(0x84)) + rs + string(rune(0x85)) + string(rune(0x85))
 		}
 	}
 	return rs
+}
+
+func stlColorCodeFromStyle(color string) string {
+	switch strings.ToLower(color) {
+	case "black", "#000000":
+		return string(stlAlphaBlack)
+	case "red", "#ff0000":
+		return string(stlAlphaRed)
+	case "green", "#00ff00":
+		return string(stlAlphaGreen)
+	case "yellow", "#ffff00":
+		return string(stlAlphaYellow)
+	case "blue", "#0000ff":
+		return string(stlAlphaBlue)
+	case "magenta", "#ff00ff":
+		return string(stlAlphaMagenta)
+	case "cyan", "#00ffff":
+		return string(stlAlphaCyan)
+	default:
+		return string(stlAlphaWhite)
+	}
 }
 
 // parseTTIBlock parses a TTI block
