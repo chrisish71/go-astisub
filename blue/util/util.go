@@ -20,6 +20,8 @@ const (
 
 func BlueModelToAsticodeModel(blueSubtitles []model.Subtitle, format string) *astisub.Subtitles {
 	var items []*astisub.Item
+	asticodeSubtitles := astisub.NewSubtitles()
+	var vttRegions = make(map[string]*astisub.Region)
 	for _, blueSubtitle := range blueSubtitles {
 		var item = new(astisub.Item)
 		item.StartAt = durationOf(blueSubtitle.StartTime)
@@ -35,9 +37,24 @@ func BlueModelToAsticodeModel(blueSubtitles []model.Subtitle, format string) *as
 				},
 			})
 		}
+		if format == VTT {
+			yViewportAnchor := (blueSubtitle.VerticalAlign * 100) / 23
+			id := "sub_" + strconv.Itoa(blueSubtitle.VerticalAlign) + "_" + strconv.Itoa(len(blueSubtitle.Lines))
+			var vttStyleAttributes = new(astisub.StyleAttributes)
+			vttStyleAttributes.WebVTTWidth = "100%"
+			vttStyleAttributes.WebVTTLines = len(blueSubtitle.Lines)
+			vttStyleAttributes.WebVTTRegionAnchor = "50%,0%"
+			vttStyleAttributes.WebVTTViewportAnchor = "50%," + strconv.Itoa(yViewportAnchor) + "%"
+			vttStyleAttributes.WebVTTScroll = "up"
+			var vttRegion = new(astisub.Region)
+			vttRegion.ID = id
+			vttRegion.InlineStyle = vttStyleAttributes
+			vttRegions[id] = vttRegion
+			item.Region = vttRegion
+		}
 		items = append(items, item)
 	}
-	asticodeSubtitles := astisub.NewSubtitles()
+	asticodeSubtitles.Regions = vttRegions
 	asticodeSubtitles.Items = items
 	return asticodeSubtitles
 }
@@ -79,7 +96,7 @@ func subtitleStyle(blueSubtitle model.Subtitle, format string) *astisub.StyleAtt
 		//styleAttributes.WebVTTVertical = blueSubtitle.VerticalAlign
 	case STL:
 		styleAttributes.STLPosition = stlPosition(blueSubtitle)
-		styleAttributes.STLJustification = &astisub.JustificationCentered
+		styleAttributes.STLJustification = &astisub.JustificationUnchanged
 	case TTML:
 	}
 	return styleAttributes
