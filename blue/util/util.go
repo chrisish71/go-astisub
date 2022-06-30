@@ -38,13 +38,12 @@ func BlueModelToAsticodeModel(blueSubtitles []model.Subtitle, format string) *as
 			})
 		}
 		if format == VTT {
-			yViewportAnchor := (blueSubtitle.VerticalAlign * 100) / 23
 			id := "sub_" + strconv.Itoa(blueSubtitle.VerticalAlign) + "_" + strconv.Itoa(len(blueSubtitle.Lines))
 			var vttStyleAttributes = new(astisub.StyleAttributes)
 			vttStyleAttributes.WebVTTWidth = "100%"
 			vttStyleAttributes.WebVTTLines = len(blueSubtitle.Lines)
 			vttStyleAttributes.WebVTTRegionAnchor = "50%,0%"
-			vttStyleAttributes.WebVTTViewportAnchor = "50%," + strconv.Itoa(yViewportAnchor) + "%"
+			vttStyleAttributes.WebVTTViewportAnchor = "50%," + vttPosition(blueSubtitle.VerticalAlign) + "%"
 			vttStyleAttributes.WebVTTScroll = "up"
 			var vttRegion = new(astisub.Region)
 			vttRegion.ID = id
@@ -79,8 +78,6 @@ func lineStyle(blueLine model.Line, format string) *astisub.StyleAttributes {
 		styleAttributes.STLUnderline = &blueLine.Underline
 	case TTML:
 		styleAttributes.TTMLColor = &blueLine.Color
-		styleAttributes.TTMLFontFamily = &blueLine.FontFamily
-		//styleAttributes.TTMLTextAlign = &blueLine.HorizontalAlign
 	}
 	return styleAttributes
 }
@@ -89,14 +86,10 @@ func subtitleStyle(blueSubtitle model.Subtitle, format string) *astisub.StyleAtt
 	var styleAttributes = new(astisub.StyleAttributes)
 	switch format {
 	case VTT:
-		styleAttributes.WebVTTSize = blueSubtitle.FontSize
 		styleAttributes.WebVTTAlign = strings.ToLower(blueSubtitle.HorizontalAlign)
-		//styleAttributes.WebVTTViewportAnchor = vttPosition(blueSubtitle.VerticalAlign)
-		// rtl or ltr
-		//styleAttributes.WebVTTVertical = blueSubtitle.VerticalAlign
 	case STL:
 		styleAttributes.STLPosition = stlPosition(blueSubtitle)
-		styleAttributes.STLJustification = &astisub.JustificationUnchanged
+		styleAttributes.STLJustification = &astisub.JustificationCentered
 	case TTML:
 	}
 	return styleAttributes
@@ -115,16 +108,16 @@ func stlPosition(blueSubtitle model.Subtitle) *astisub.STLPosition {
 func formatText(line model.Line, format string) string {
 	if format == STL {
 		length := len(line.Text)
-		switch line.HorizontalAlign {
+		switch line.Justification {
 		case LEFT:
-			return line.Text + strings.Repeat(" ", int(math.Max(float64(40-length), 0)))
+			return line.Text + strings.Repeat(" ", int(math.Max(float64(36-length), 0)))
 		case CENTER:
 			if length%2 != 0 {
 				length++
 			}
-			return strings.Repeat(" ", int(math.Max(float64((40-length)/2), 0))) + line.Text + strings.Repeat(" ", int(math.Max(float64((40-length)/2), 0)))
+			return strings.Repeat(" ", int(math.Max(float64((36-length)/2), 0))) + line.Text + strings.Repeat(" ", int(math.Max(float64((36-length)/2), 0)))
 		case RIGHT:
-			return strings.Repeat(" ", int(math.Max(float64(40-length), 0))) + line.Text
+			return strings.Repeat(" ", int(math.Max(float64(36-length), 0))) + line.Text
 		default:
 			return line.Text
 		}

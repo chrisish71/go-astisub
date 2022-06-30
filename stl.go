@@ -363,7 +363,7 @@ func newGSIBlock(s Subtitles) (g *gsiBlock) {
 		displayStandardCode:      stlDisplayStandardCodeLevel2Teletext,
 		framerate:                25,
 		languageCode:             stlLanguageCodeFrench,
-		maximumNumberOfDisplayableCharactersInAnyTextRow: 40,
+		maximumNumberOfDisplayableCharactersInAnyTextRow: 36,
 		maximumNumberOfDisplayableRows:                   23,
 		revisionDate:                                     Now(),
 		subtitleListReferenceCode:                        "",
@@ -724,7 +724,7 @@ func (li LineItem) STLString() string {
 			rs = string(rune(0x82)) + rs + string(rune(0x83))
 		}
 		if li.InlineStyle.STLBoxing != nil && *li.InlineStyle.STLBoxing {
-			rs = string(rune(0x84)) + string(rune(0x84)) + rs + string(rune(0x85)) + string(rune(0x85))
+			rs = string(rune(0x84)) + rs + string(rune(0x85))
 		}
 	}
 	return rs
